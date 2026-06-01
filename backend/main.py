@@ -3,6 +3,8 @@ import tempfile
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 from typing import List, Optional
 from pydantic import BaseModel
 
@@ -17,18 +19,44 @@ from utils import (
 
 app = FastAPI(title="RAY - Resume-based Application Yield")
 
-allowed_origins = [
-    "https://job-recommender-seven.vercel.app",
-    "http://localhost:3000",
-]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# -------------------- FORCED CORS MIDDLEWARE --------------------
+class ForceCORSMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        # Set CORS headers for every response
+        response.headers["Access-Control-Allow-Origin"] = (
+            "https://job-recommender-seven.vercel.app"
+        )
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = (
+            "GET, POST, PUT, DELETE, OPTIONS"
+        )
+        response.headers["Access-Control-Allow-Headers"] = (
+            "Content-Type, Authorization, Accept, Origin"
+        )
+        return response
+
+
+app.add_middleware(ForceCORSMiddleware)
+
+
+# Handle OPTIONS preflight requests for all paths
+@app.options("/{path:path}")
+async def options_handler(path: str):
+    return Response(
+        content="",
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": "https://job-recommender-seven.vercel.app",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept, Origin",
+        },
+    )
+
+
+# -------------------- END CORS FIX --------------------
 
 
 # ---------- Request/Response Models ----------
