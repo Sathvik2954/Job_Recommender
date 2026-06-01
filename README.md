@@ -2,6 +2,10 @@
 
 A modern AI-powered job recommendation platform that analyzes resumes, extracts skills and experience, and matches users with relevant job opportunities using real-time job APIs.
 
+## Live Demo
+
+🔗 https://job-recommender-sigma.vercel.app/
+
 ---
 
 ## Overview
@@ -38,8 +42,11 @@ The platform combines AI-powered resume analysis with real-time job aggregation 
   - Adzuna
 
 - India and Global job opportunities
+
 - Preference-based job search
+
 - Multiple domain coverage
+
 - Fresh job listings
 
 ### Smart Matching
