@@ -2,17 +2,19 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Loader2, AlertCircle, Download, Globe, MapPin } from 'lucide-react';
+import { Search, Loader2, AlertCircle, Download, Globe, MapPin, Bookmark } from 'lucide-react';
 import { fetchPreferenceJobs, exportToCSV } from '@/services/api';
 import JobCard from './JobCard';
+import { useSavedJobs } from '@/utils/session';
 
-type Region = 'india' | 'global' | 'both';
+type Region = 'india' | 'global' | 'both' | 'saved';
 
 export default function PreferenceSection({ onJobsFetched, jobs }: any) {
   const [keywords, setKeywords] = useState('');
   const [region, setRegion] = useState<Region>('both');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { savedJobs, saveJob, removeJob } = useSavedJobs();
 
   const handleSearch = async () => {
     if (!keywords.trim()) return;
@@ -26,8 +28,11 @@ export default function PreferenceSection({ onJobsFetched, jobs }: any) {
         filtered = filtered.filter((job: any) => job.country?.toLowerCase().includes('india'));
       } else if (region === 'global') {
         filtered = filtered.filter((job: any) => !job.country?.toLowerCase().includes('india'));
+      } else if (region === 'both') {
+        // keep all
+      } else if (region === 'saved') {
+        filtered = Object.values(savedJobs);
       }
-      // Sort by match score descending
       const sorted = [...filtered].sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
       onJobsFetched(sorted);
     } catch (err: any) {
@@ -42,6 +47,8 @@ export default function PreferenceSection({ onJobsFetched, jobs }: any) {
     await exportToCSV(jobs);
   };
 
+  const displayJobs = region === 'saved' ? Object.values(savedJobs) : jobs;
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row gap-4">
@@ -51,6 +58,7 @@ export default function PreferenceSection({ onJobsFetched, jobs }: any) {
           onChange={(e) => setKeywords(e.target.value)}
           placeholder="e.g., backend developer, data scientist, remote"
           className="flex-1 input-warm"
+          disabled={region === 'saved'}
         />
         <div className="flex flex-wrap gap-2">
           <button
@@ -69,13 +77,21 @@ export default function PreferenceSection({ onJobsFetched, jobs }: any) {
             onClick={() => setRegion('both')}
             className={`px-4 py-2 rounded-xl text-sm flex items-center gap-2 transition-all ${region === 'both' ? 'bg-accent/10 text-accent border border-accent/30' : 'bg-surfaceSecondary/30 text-textSecondary'}`}
           >
-            🌍 Both
+             Both
+          </button>
+          <button
+            onClick={() => setRegion('saved')}
+            className={`px-4 py-2 rounded-xl text-sm flex items-center gap-2 transition-all ${region === 'saved' ? 'bg-accent/10 text-accent border border-accent/30' : 'bg-surfaceSecondary/30 text-textSecondary'}`}
+          >
+            <Bookmark className="w-4 h-4" /> Saved ({Object.keys(savedJobs).length})
           </button>
         </div>
-        <button onClick={handleSearch} disabled={loading} className="btn-primary flex items-center gap-2 min-w-[120px]">
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-          {loading ? 'Searching...' : 'Find Jobs'}
-        </button>
+        {region !== 'saved' && (
+          <button onClick={handleSearch} disabled={loading} className="btn-primary flex items-center gap-2 min-w-[120px]">
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+            {loading ? 'Searching...' : 'Find Jobs'}
+          </button>
+        )}
       </div>
 
       {error && (
@@ -84,18 +100,32 @@ export default function PreferenceSection({ onJobsFetched, jobs }: any) {
         </motion.div>
       )}
 
-      {jobs.length > 0 && (
+      {displayJobs.length > 0 && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <p className="text-sm text-textSecondary">{jobs.length} opportunities found</p>
+            <p className="text-sm text-textSecondary">{displayJobs.length} opportunities found</p>
             <button onClick={handleExport} className="btn-secondary flex items-center gap-2 text-sm"><Download className="w-4 h-4" /> Export CSV</button>
           </div>
           <div className="space-y-4">
-            {jobs.map((job: any, idx: number) => (
-              <JobCard key={`pref-${idx}`} job={job} />
-            ))}
+            {displayJobs.map((job: any, idx: number) => {
+              const jobId = `${job.title}-${job.company}`;
+              const isSaved = !!savedJobs[jobId];
+              return (
+                <JobCard
+                  key={`pref-${idx}`}
+                  job={job}
+                  onSave={() => saveJob(job)}
+                  onRemove={() => removeJob(jobId)}
+                  isSaved={isSaved}
+                />
+              );
+            })}
           </div>
         </div>
+      )}
+
+      {displayJobs.length === 0 && region === 'saved' && (
+        <p className="text-center text-textSecondary py-12">No saved jobs yet. Save a job from the India or Global tabs.</p>
       )}
     </div>
   );

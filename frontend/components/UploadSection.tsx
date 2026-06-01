@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { motion } from 'framer-motion';
-import { Upload, Loader2, AlertCircle, Download, Sliders, Briefcase, Globe } from 'lucide-react';
+import { Upload, Loader2, AlertCircle, Download, Sliders, Briefcase, Globe, Bookmark } from 'lucide-react';
 import { uploadResume, exportToCSV } from '../services/api';
 import JobCard from './JobCard';
+import { useSavedJobs } from '@/utils/session';
 
 export default function UploadSection({ onJobsFetched, jobs }: { onJobsFetched: (jobs: any[]) => void; jobs: any[] }) {
   const [uploading, setUploading] = useState(false);
@@ -13,7 +14,8 @@ export default function UploadSection({ onJobsFetched, jobs }: { onJobsFetched: 
   const [matchThreshold, setMatchThreshold] = useState(0);
   const [skills, setSkills] = useState<string[]>([]);
   const [expLevel, setExpLevel] = useState('');
-  const [activeRegion, setActiveRegion] = useState<'india' | 'global'>('india');
+  const [activeRegion, setActiveRegion] = useState<'india' | 'global' | 'saved'>('india');
+  const { savedJobs, saveJob, removeJob } = useSavedJobs();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -24,7 +26,6 @@ export default function UploadSection({ onJobsFetched, jobs }: { onJobsFetched: 
       const response = await uploadResume(file);
       setSkills(response.skills);
       setExpLevel(response.experience_level);
-      // Sort jobs by match score descending
       const sortedJobs = [...response.jobs].sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
       onJobsFetched(sortedJobs);
     } catch (err: any) {
@@ -46,14 +47,21 @@ export default function UploadSection({ onJobsFetched, jobs }: { onJobsFetched: 
 
   const indiaJobs = jobs.filter(job => job.country?.toLowerCase().includes('india'));
   const globalJobs = jobs.filter(job => !job.country?.toLowerCase().includes('india'));
+  const savedJobsList = Object.values(savedJobs);
 
   const filterByScore = (jobList: any[]) => jobList.filter(job => (job.match_score || 0) >= matchThreshold);
   const filteredIndia = filterByScore(indiaJobs);
   const filteredGlobal = filterByScore(globalJobs);
-  const currentJobs = activeRegion === 'india' ? filteredIndia : filteredGlobal;
+  const filteredSaved = filterByScore(savedJobsList);
+
+  const getCurrentJobs = () => {
+    if (activeRegion === 'india') return filteredIndia;
+    if (activeRegion === 'global') return filteredGlobal;
+    return filteredSaved;
+  };
 
   const handleExport = async () => {
-    const allFiltered = [...filteredIndia, ...filteredGlobal];
+    const allFiltered = [...filteredIndia, ...filteredGlobal, ...filteredSaved];
     if (allFiltered.length === 0) return;
     await exportToCSV(allFiltered);
   };
@@ -87,10 +95,10 @@ export default function UploadSection({ onJobsFetched, jobs }: { onJobsFetched: 
         </div>
       )}
 
-      {(indiaJobs.length > 0 || globalJobs.length > 0) && (
+      {(indiaJobs.length > 0 || globalJobs.length > 0 || savedJobsList.length > 0) && (
         <>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => setActiveRegion('india')}
                 className={`px-5 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-all ${activeRegion === 'india' ? 'bg-accent text-white shadow-md' : 'bg-surfaceSecondary/50 text-textSecondary hover:bg-surfaceSecondary'}`}
@@ -102,6 +110,12 @@ export default function UploadSection({ onJobsFetched, jobs }: { onJobsFetched: 
                 className={`px-5 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-all ${activeRegion === 'global' ? 'bg-accent text-white shadow-md' : 'bg-surfaceSecondary/50 text-textSecondary hover:bg-surfaceSecondary'}`}
               >
                 <Globe className="w-4 h-4" /> Global ({filteredGlobal.length})
+              </button>
+              <button
+                onClick={() => setActiveRegion('saved')}
+                className={`px-5 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-all ${activeRegion === 'saved' ? 'bg-accent text-white shadow-md' : 'bg-surfaceSecondary/50 text-textSecondary hover:bg-surfaceSecondary'}`}
+              >
+                <Bookmark className="w-4 h-4" /> Saved ({filteredSaved.length})
               </button>
             </div>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -115,11 +129,25 @@ export default function UploadSection({ onJobsFetched, jobs }: { onJobsFetched: 
             </div>
           </div>
 
-          {currentJobs.length === 0 ? (
-            <p className="text-center text-textSecondary py-12">No jobs meet the threshold. Try lowering the slider.</p>
+          {getCurrentJobs().length === 0 ? (
+            <p className="text-center text-textSecondary py-12">
+              {activeRegion === 'saved' ? 'No saved jobs yet.' : 'No jobs meet the threshold. Try lowering the slider.'}
+            </p>
           ) : (
             <div className="space-y-4">
-              {currentJobs.map((job, idx) => <JobCard key={`${activeRegion}-${idx}`} job={job} />)}
+              {getCurrentJobs().map((job, idx) => {
+                const jobId = `${job.title}-${job.company}`;
+                const isSaved = !!savedJobs[jobId];
+                return (
+                  <JobCard
+                    key={`${activeRegion}-${idx}`}
+                    job={job}
+                    onSave={() => saveJob(job)}
+                    onRemove={() => removeJob(jobId)}
+                    isSaved={isSaved}
+                  />
+                );
+              })}
             </div>
           )}
         </>

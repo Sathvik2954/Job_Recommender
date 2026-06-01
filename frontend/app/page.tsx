@@ -37,7 +37,7 @@ export default function Home() {
               activeTab === 'resume' ? 'bg-accent text-textPrimary shadow-md' : 'bg-surfaceSecondary/50 text-textSecondary hover:bg-surfaceSecondary'
             }`}
           >
-            📄 Upload Resume
+             Upload Resume
           </button>
           <button
             onClick={() => setActiveTab('preference')}
@@ -45,7 +45,7 @@ export default function Home() {
               activeTab === 'preference' ? 'bg-accent text-textPrimary shadow-md' : 'bg-surfaceSecondary/50 text-textSecondary hover:bg-surfaceSecondary'
             }`}
           >
-            🎯 Preference Search
+             Preference Search
           </button>
         </div>
 
