@@ -1,20 +1,20 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import UploadSection from '@/components/UploadSection'
-import PreferenceSection from '@/components/PreferenceSection'
-import Footer from '@/components/Footer'
-import { motion } from 'framer-motion'
+import { useState } from 'react';
+import UploadSection from '@/components/UploadSection';
+import PreferenceSection from '@/components/PreferenceSection';
+import SavedJobsSection from '@/components/SavedJobsSection';
+import Footer from '@/components/Footer';
+import { motion } from 'framer-motion';
 
 export default function Home() {
-  const [resumeJobs, setResumeJobs] = useState<any[]>([])
-  const [prefJobs, setPrefJobs] = useState<any[]>([])
-  const [activeTab, setActiveTab] = useState<'resume' | 'preference'>('resume')
+  const [resumeJobs, setResumeJobs] = useState<any[]>([]);
+  const [prefJobs, setPrefJobs] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'resume' | 'preference'>('resume');
 
   return (
     <main className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
-        {/* Hero section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -30,41 +30,33 @@ export default function Home() {
           </p>
         </motion.div>
 
-        {/* Toggle */}
         <div className="flex justify-center gap-3 mb-12">
           <button
             onClick={() => setActiveTab('resume')}
             className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-              activeTab === 'resume'
-                ? 'bg-accent text-textPrimary shadow-md'
-                : 'bg-surfaceSecondary/50 text-textSecondary hover:bg-surfaceSecondary'
+              activeTab === 'resume' ? 'bg-accent text-textPrimary shadow-md' : 'bg-surfaceSecondary/50 text-textSecondary hover:bg-surfaceSecondary'
             }`}
           >
-            Upload Resume
+            📄 Upload Resume
           </button>
           <button
             onClick={() => setActiveTab('preference')}
             className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-              activeTab === 'preference'
-                ? 'bg-accent text-textPrimary shadow-md'
-                : 'bg-surfaceSecondary/50 text-textSecondary hover:bg-surfaceSecondary'
+              activeTab === 'preference' ? 'bg-accent text-textPrimary shadow-md' : 'bg-surfaceSecondary/50 text-textSecondary hover:bg-surfaceSecondary'
             }`}
           >
-            Preference Search
+            🎯 Preference Search
           </button>
         </div>
 
-        {/* Content */}
         <div className="mt-8">
-          {activeTab === 'resume' && (
-            <UploadSection onJobsFetched={setResumeJobs} jobs={resumeJobs} />
-          )}
-          {activeTab === 'preference' && (
-            <PreferenceSection onJobsFetched={setPrefJobs} jobs={prefJobs} />
-          )}
+          {activeTab === 'resume' && <UploadSection onJobsFetched={setResumeJobs} jobs={resumeJobs} />}
+          {activeTab === 'preference' && <PreferenceSection onJobsFetched={setPrefJobs} jobs={prefJobs} />}
         </div>
+
+        <SavedJobsSection />
       </div>
       <Footer />
     </main>
-  )
+  );
 }

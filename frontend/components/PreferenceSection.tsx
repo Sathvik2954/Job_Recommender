@@ -1,44 +1,46 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Search, Loader2, AlertCircle, Download, Globe, MapPin } from 'lucide-react'
-import { fetchPreferenceJobs, exportToCSV } from '@/services/api'
-import JobCard from './JobCard'
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Search, Loader2, AlertCircle, Download, Globe, MapPin } from 'lucide-react';
+import { fetchPreferenceJobs, exportToCSV } from '@/services/api';
+import JobCard from './JobCard';
 
-type Region = 'india' | 'global' | 'both'
+type Region = 'india' | 'global' | 'both';
 
 export default function PreferenceSection({ onJobsFetched, jobs }: any) {
-  const [keywords, setKeywords] = useState('')
-  const [region, setRegion] = useState<Region>('both')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [keywords, setKeywords] = useState('');
+  const [region, setRegion] = useState<Region>('both');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSearch = async () => {
-    if (!keywords.trim()) return
-    setLoading(true)
-    setError('')
+    if (!keywords.trim()) return;
+    setLoading(true);
+    setError('');
     try {
-      const kwArray = keywords.split(',').map(k => k.trim())
-      const res = await fetchPreferenceJobs(kwArray, 0) // minScore ignored in backend, we'll filter region on frontend
-      let filtered = res.jobs
+      const kwArray = keywords.split(',').map(k => k.trim());
+      const res = await fetchPreferenceJobs(kwArray, 0);
+      let filtered = res.jobs;
       if (region === 'india') {
-        filtered = filtered.filter((job: any) => job.country?.toLowerCase().includes('india'))
+        filtered = filtered.filter((job: any) => job.country?.toLowerCase().includes('india'));
       } else if (region === 'global') {
-        filtered = filtered.filter((job: any) => !job.country?.toLowerCase().includes('india'))
+        filtered = filtered.filter((job: any) => !job.country?.toLowerCase().includes('india'));
       }
-      onJobsFetched(filtered)
+      // Sort by match score descending
+      const sorted = [...filtered].sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
+      onJobsFetched(sorted);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Search failed')
+      setError(err.response?.data?.detail || 'Search failed');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleExport = async () => {
-    if (jobs.length === 0) return
-    await exportToCSV(jobs)
-  }
+    if (jobs.length === 0) return;
+    await exportToCSV(jobs);
+  };
 
   return (
     <div className="space-y-8">
@@ -50,30 +52,24 @@ export default function PreferenceSection({ onJobsFetched, jobs }: any) {
           placeholder="e.g., backend developer, data scientist, remote"
           className="flex-1 input-warm"
         />
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setRegion('india')}
-            className={`px-4 py-2 rounded-xl text-sm flex items-center gap-2 transition-all ${
-              region === 'india' ? 'bg-accent/10 text-accent border border-accent/30' : 'bg-surfaceSecondary/30 text-textSecondary'
-            }`}
+            className={`px-4 py-2 rounded-xl text-sm flex items-center gap-2 transition-all ${region === 'india' ? 'bg-accent/10 text-accent border border-accent/30' : 'bg-surfaceSecondary/30 text-textSecondary'}`}
           >
             <MapPin className="w-4 h-4" /> India
           </button>
           <button
             onClick={() => setRegion('global')}
-            className={`px-4 py-2 rounded-xl text-sm flex items-center gap-2 transition-all ${
-              region === 'global' ? 'bg-accent/10 text-accent border border-accent/30' : 'bg-surfaceSecondary/30 text-textSecondary'
-            }`}
+            className={`px-4 py-2 rounded-xl text-sm flex items-center gap-2 transition-all ${region === 'global' ? 'bg-accent/10 text-accent border border-accent/30' : 'bg-surfaceSecondary/30 text-textSecondary'}`}
           >
             <Globe className="w-4 h-4" /> Global
           </button>
           <button
             onClick={() => setRegion('both')}
-            className={`px-4 py-2 rounded-xl text-sm flex items-center gap-2 transition-all ${
-              region === 'both' ? 'bg-accent/10 text-accent border border-accent/30' : 'bg-surfaceSecondary/30 text-textSecondary'
-            }`}
+            className={`px-4 py-2 rounded-xl text-sm flex items-center gap-2 transition-all ${region === 'both' ? 'bg-accent/10 text-accent border border-accent/30' : 'bg-surfaceSecondary/30 text-textSecondary'}`}
           >
-            Both
+            🌍 Both
           </button>
         </div>
         <button onClick={handleSearch} disabled={loading} className="btn-primary flex items-center gap-2 min-w-[120px]">
@@ -92,17 +88,15 @@ export default function PreferenceSection({ onJobsFetched, jobs }: any) {
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <p className="text-sm text-textSecondary">{jobs.length} opportunities found</p>
-            <button onClick={handleExport} className="btn-secondary flex items-center gap-2 text-sm">
-              <Download className="w-4 h-4" /> Export CSV
-            </button>
+            <button onClick={handleExport} className="btn-secondary flex items-center gap-2 text-sm"><Download className="w-4 h-4" /> Export CSV</button>
           </div>
           <div className="space-y-4">
             {jobs.map((job: any, idx: number) => (
-              <JobCard key={idx} job={job} />
+              <JobCard key={`pref-${idx}`} job={job} />
             ))}
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -24,7 +24,9 @@ export default function UploadSection({ onJobsFetched, jobs }: { onJobsFetched: 
       const response = await uploadResume(file);
       setSkills(response.skills);
       setExpLevel(response.experience_level);
-      onJobsFetched(response.jobs);
+      // Sort jobs by match score descending
+      const sortedJobs = [...response.jobs].sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
+      onJobsFetched(sortedJobs);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to process resume. Please try again.');
     } finally {
@@ -87,22 +89,22 @@ export default function UploadSection({ onJobsFetched, jobs }: { onJobsFetched: 
 
       {(indiaJobs.length > 0 || globalJobs.length > 0) && (
         <>
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex gap-2">
               <button
                 onClick={() => setActiveRegion('india')}
-                className={`px-5 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-all ${activeRegion === 'india' ? 'bg-accent text-textPrimary shadow-md' : 'bg-surfaceSecondary/50 text-textSecondary hover:bg-surfaceSecondary'}`}
+                className={`px-5 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-all ${activeRegion === 'india' ? 'bg-accent text-white shadow-md' : 'bg-surfaceSecondary/50 text-textSecondary hover:bg-surfaceSecondary'}`}
               >
                 <Briefcase className="w-4 h-4" /> India ({filteredIndia.length})
               </button>
               <button
                 onClick={() => setActiveRegion('global')}
-                className={`px-5 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-all ${activeRegion === 'global' ? 'bg-accent text-textPrimary shadow-md' : 'bg-surfaceSecondary/50 text-textSecondary hover:bg-surfaceSecondary'}`}
+                className={`px-5 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-all ${activeRegion === 'global' ? 'bg-accent text-white shadow-md' : 'bg-surfaceSecondary/50 text-textSecondary hover:bg-surfaceSecondary'}`}
               >
                 <Globe className="w-4 h-4" /> Global ({filteredGlobal.length})
               </button>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div className="flex items-center gap-3">
                 <Sliders className="w-4 h-4 text-muted" />
                 <span className="text-sm text-textSecondary">Match ≥</span>

@@ -1,9 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Briefcase, MapPin, Calendar, DollarSign, ExternalLink, Building2 } from 'lucide-react';
+import { Briefcase, MapPin, Calendar, DollarSign, ExternalLink, Building2, Bookmark, BookmarkCheck } from 'lucide-react';
 
-export default function JobCard({ job }: { job: any }) {
+export default function JobCard({ job, onSave, onRemove, isSaved }: any) {
   const postedDate = job.posted_date ? new Date(job.posted_date).toLocaleDateString() : 'Date unknown';
 
   const getSalaryDisplay = () => {
@@ -11,20 +11,12 @@ export default function JobCard({ job }: { job: any }) {
     const isIndia = job.country?.toLowerCase().includes('india');
     let raw = String(job.salary);
     if (isIndia) {
-      // Remove $, USD, any other currency symbols, then add ₹
       let cleaned = raw.replace(/[$]/g, '').replace(/USD/gi, '').trim();
-      if (!cleaned.startsWith('₹')) {
-        if (/^\d/.test(cleaned)) return `₹${cleaned}`;
-        return `₹ ${cleaned}`;
-      }
+      if (!cleaned.startsWith('₹')) return `₹${cleaned}`;
       return cleaned;
     } else {
-      // Remove ₹, INR, then add $
       let cleaned = raw.replace(/[₹]/g, '').replace(/INR/gi, '').trim();
-      if (!cleaned.startsWith('$')) {
-        if (/^\d/.test(cleaned)) return `$${cleaned}`;
-        return `$ ${cleaned}`;
-      }
+      if (!cleaned.startsWith('$')) return `$${cleaned}`;
       return cleaned;
     }
   };
@@ -44,12 +36,25 @@ export default function JobCard({ job }: { job: any }) {
           {job.match_score !== undefined && (
             <div className="mt-2">
               <span className="text-xs font-medium text-accent">Match {Math.round(job.match_score)}%</span>
-              <div className="w-full bg-surfaceSecondary rounded-full h-1.5 mt-1"><div className="bg-accent h-1.5 rounded-full" style={{ width: `${job.match_score}%` }} /></div>
+              <div className="w-full bg-surfaceSecondary rounded-full h-1.5 mt-1">
+                <div className="bg-accent h-1.5 rounded-full" style={{ width: `${job.match_score}%` }} />
+              </div>
             </div>
           )}
         </div>
-        <div className="flex items-center justify-end md:justify-start">
-          <a href={job.apply_link} target="_blank" rel="noopener noreferrer" className="btn-primary flex items-center gap-2 text-sm">Apply <ExternalLink className="w-4 h-4" /></a>
+        <div className="flex flex-col sm:flex-row items-center gap-2">
+          <a href={job.apply_link} target="_blank" rel="noopener noreferrer" className="btn-primary flex items-center gap-2 text-sm whitespace-nowrap">
+            Apply <ExternalLink className="w-4 h-4" />
+          </a>
+          {isSaved ? (
+            <button onClick={() => onRemove(job)} className="btn-secondary flex items-center gap-2 text-sm">
+              <BookmarkCheck className="w-4 h-4" /> Saved
+            </button>
+          ) : (
+            <button onClick={() => onSave(job)} className="btn-ghost flex items-center gap-2 text-sm">
+              <Bookmark className="w-4 h-4" /> Save
+            </button>
+          )}
         </div>
       </div>
     </motion.div>
