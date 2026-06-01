@@ -1,7 +1,104 @@
+# ==========================================
+# Python
+# ==========================================
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+coverage/
+
+# ==========================================
+# Backend
+# ==========================================
+backend/temp/
+uploads/
+media/
+
+# Database Files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# ==========================================
+# Environment Variables
+# ==========================================
 .env
-.streamlit/secrets.toml
-.DS_Store
-.idea/
+.env.*
+!.env.example
+
+# API Keys / Certificates
+*.key
+*.pem
+
+# ==========================================
+# Node.js / Next.js
+# ==========================================
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Package Manager Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# Yarn / PnP
+.pnp
+.pnp.js
+.pnp.*
+
+# ==========================================
+# IDE / Editor
+# ==========================================
 .vscode/
+.idea/
+*.sublime-*
+.project
+.classpath
+
+# ==========================================
+# OS Files
+# ==========================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+.directory
+
+# ==========================================
+# Temporary Files
+# ==========================================
+*.tmp
+*.temp
+*.bak
+*.cache
+*.swp
+*.swo
+*~
+
+# ==========================================
+# Misc
+# ==========================================
+.frontend/
