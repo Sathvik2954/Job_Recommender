@@ -24,9 +24,9 @@ app = FastAPI(title="RAY - Resume-based Application Yield")
 class ForceCORSMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         response = await call_next(request)
-        # Set CORS headers for every response
+        # Set CORS headers for every response – use your exact frontend URL
         response.headers["Access-Control-Allow-Origin"] = (
-            "https://job-recommender-seven.vercel.app"
+            "https://job-recommender-sigma.vercel.app"
         )
         response.headers["Access-Control-Allow-Credentials"] = "true"
         response.headers["Access-Control-Allow-Methods"] = (
@@ -48,7 +48,7 @@ async def options_handler(path: str):
         content="",
         status_code=200,
         headers={
-            "Access-Control-Allow-Origin": "https://job-recommender-seven.vercel.app",
+            "Access-Control-Allow-Origin": "https://job-recommender-sigma.vercel.app",
             "Access-Control-Allow-Credentials": "true",
             "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept, Origin",
