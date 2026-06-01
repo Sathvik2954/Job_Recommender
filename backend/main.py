@@ -1,11 +1,13 @@
 import os
 import tempfile
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel
-from backend.utils import (
+
+# Updated imports – no 'backend.' prefix
+from utils import (
     extract_text_from_file,
     extract_skills_with_mistral,
     fetch_jobs_by_keywords,
