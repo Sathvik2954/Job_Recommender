@@ -7,7 +7,7 @@
 @layer base {
   body {
     @apply bg-background text-textPrimary font-body antialiased;
-    background-image: radial-gradient(circle at 15% 30%, rgba(124, 92, 252, 0.02) 0%, transparent 50%);
+    background-image: radial-gradient(circle at 15% 30%, rgba(124, 92, 252, 0.03) 0%, transparent 60%);
   }
   h1, h2, h3 {
     @apply font-heading font-semibold tracking-tight;
@@ -29,7 +29,7 @@
     @apply bg-surfaceSecondary/30 border border-border rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-accent/40 transition-all;
   }
   .btn-primary {
-    @apply bg-accent text-textPrimary font-medium px-6 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.01] hover:shadow-md active:scale-[0.99];
+    @apply bg-accent text-white font-medium px-6 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.01] hover:shadow-md active:scale-[0.99];
   }
   .btn-secondary {
     @apply bg-surfaceSecondary text-textPrimary font-medium px-6 py-2.5 rounded-xl transition-all duration-200 hover:bg-surfaceSecondary/70;
